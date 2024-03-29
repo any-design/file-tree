@@ -73,7 +73,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import ContextMenuItem from '../packages/contextmenu/ContextMenuItem.vue';
 import ContextMenu from '../packages/contextmenu/ContextMenu.vue';
 import type { TreeNode } from '../packages/filetree/types';
@@ -231,31 +231,14 @@ const data = [
   },
 ];
 
-const treeData1 = reactive(JSON.parse(JSON.stringify(data)));
+const showList2 = ref(false);
+
+const treeData1 = computed(() => data);
 
 setTimeout(() => {
-  treeData1.push({
-    title: 'Movies',
-    path: '/users/Jim/Movies',
-    type: 'folder',
-    children: [
-      {
-        title: 'Video1.mp4',
-        path: '/users/Jim/videos/Video1.mp4',
-        type: 'file',
-      },
-      {
-        title: 'Video2.mp4',
-        path: '/users/Jim/videos/Video2.mp4',
-        type: 'file',
-      },
-    ],
-  });
+  showList2.value = true;
+  console.log('treeData replaced');
 }, 3000);
-
-setTimeout(() => {
-  treeData1[treeData1.length - 1].children[0].title = 'Video TTTT.mp4';
-}, 8000);
 
 const treeData2 = reactive(JSON.parse(JSON.stringify(data)));
 </script>

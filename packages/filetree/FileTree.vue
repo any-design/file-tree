@@ -31,7 +31,7 @@
 
 <script lang="ts" setup>
 import FileTreeNode from './FileTreeNode.vue';
-import { provide, reactive } from 'vue';
+import { provide, reactive, watch, unref, type PropType } from 'vue';
 import type { DragDropObject, TreeNode } from './types';
 import { Position } from './types';
 import { dirname, findIndexByPath, findNodeByPath, findParentNodeByPath, flattenVisibleTree, join } from './utils';
@@ -59,7 +59,7 @@ const emits = defineEmits([
 const props = defineProps({
   // 数据源列表
   data: {
-    type: Array as () => TreeNode[],
+    type: Array as PropType<TreeNode[]>,
     required: true,
   },
   draggable: {
@@ -79,6 +79,13 @@ const treeData: TreeNode = reactive({
   expanded: true,
   children: props.data,
 });
+
+watch(
+  () => props.data,
+  () => {
+    treeData.children = reactive(unref(props.data));
+  },
+);
 
 let selectedItems = [] as TreeNode[];
 let focusedNode: TreeNode | null = null;
