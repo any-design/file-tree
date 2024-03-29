@@ -1,26 +1,22 @@
-import {onMounted, onBeforeUnmount, ref} from "vue"
+import { onMounted, onBeforeUnmount } from 'vue';
 
-function useClickOutside(
-    elementRef:  any,
-    callback: (event: MouseEvent) => void
-
-): void {
-    const clickOutsideHandler = (event: MouseEvent) => {
-        const el = elementRef.value
-        if (!el || el === event.target || event.composedPath().includes(el)) {
-            return
-        }
-
-        callback(event)
+function useClickOutside(elementRef: any, callback: (event: MouseEvent) => void): void {
+  const clickOutsideHandler = (event: MouseEvent) => {
+    const el = elementRef.value;
+    if (!el || el === event.target || event.composedPath().includes(el)) {
+      return;
     }
 
-    onMounted(() => {
-        window.addEventListener("click", clickOutsideHandler)
-    })
+    callback(event);
+  };
 
-    onBeforeUnmount(() => {
-        window.removeEventListener("click", clickOutsideHandler)
-    })
+  onMounted(() => {
+    window.addEventListener('click', clickOutsideHandler);
+  });
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('click', clickOutsideHandler);
+  });
 }
 
-export default useClickOutside
+export default useClickOutside;

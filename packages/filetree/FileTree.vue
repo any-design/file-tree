@@ -1,16 +1,26 @@
 <template>
   <div class="file-tree-view" @focusin="onFocusIn" @focusout="onFocusOut" tabindex="0">
     <ul>
-      <FileTreeNode :node-data="data" :level="1" @nodeDrop="onNodeDrop" @nodeSelect="onNodeSelect"
-                    @fileCreate="onFileCreate" @folderCreate="onFolderCreate" @nodeRename="onNodeRename"
-                    @nodeContextmenu="onNodeContextmenu" @nodeExpand="onNodeExpand" @nodeCollapse="onNodeCollapse">
-        <template v-slot:title="{nodeData}">
+      <FileTreeNode
+        :node-data="data"
+        :level="1"
+        :draggable="draggable"
+        @nodeDrop="onNodeDrop"
+        @nodeSelect="onNodeSelect"
+        @fileCreate="onFileCreate"
+        @folderCreate="onFolderCreate"
+        @nodeRename="onNodeRename"
+        @nodeContextmenu="onNodeContextmenu"
+        @nodeExpand="onNodeExpand"
+        @nodeCollapse="onNodeCollapse"
+      >
+        <template v-slot:title="{ nodeData }">
           <slot name="title" :nodeData="nodeData"></slot>
         </template>
-        <template v-slot:toggler="{nodeData}">
+        <template v-slot:toggler="{ nodeData }">
           <slot name="toggler" :nodeData="nodeData"></slot>
         </template>
-        <template v-slot:icon="{nodeData}">
+        <template v-slot:icon="{ nodeData }">
           <slot name="icon" :nodeData="nodeData"></slot>
         </template>
       </FileTreeNode>
@@ -19,42 +29,54 @@
 </template>
 
 <script lang="ts" setup>
-import FileTreeNode from "./FileTreeNode.vue";
-import {provide, reactive} from "vue";
-import type {DragDropObject, TreeNode} from "./types";
-import {Position} from "./types";
-import {dirname, findIndexByPath, findNodeByPath, findParentNodeByPath, flattenVisibleTree, join} from "./utils";
+import FileTreeNode from './FileTreeNode.vue';
+import { provide, reactive } from 'vue';
+import type { DragDropObject, TreeNode } from './types';
+import { Position } from './types';
+import { dirname, findIndexByPath, findNodeByPath, findParentNodeByPath, flattenVisibleTree, join } from './utils';
 
-let ddo: DragDropObject = {
+const ddo: DragDropObject = {
   drag: null,
   drop: null,
-  position: Position.IN
+  position: Position.IN,
 };
 
 provide('ddo', ddo);
 
-const emits = defineEmits(['nodeSelect', 'fileCreate', 'folderCreate', 'nodeRename', 'nodeContextmenu', 'nodeExpand', 'nodeCollapse', 'nodeDrop', 'nodeMove']);
+const emits = defineEmits([
+  'nodeSelect',
+  'fileCreate',
+  'folderCreate',
+  'nodeRename',
+  'nodeContextmenu',
+  'nodeExpand',
+  'nodeCollapse',
+  'nodeDrop',
+  'nodeMove',
+]);
 
 const props = defineProps({
   // 数据源列表
   data: {
     type: Array as () => TreeNode[],
-    required: true
-  }
+    required: true,
+  },
+  draggable: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const data: TreeNode = reactive({
-  title: "/",
-  path: "/",
-  type: "folder",
+  title: '/',
+  path: '/',
+  type: 'folder',
   expanded: true,
-  children: props.data
-})
-
+  children: props.data,
+});
 
 let selectedItems = [] as TreeNode[];
 let focusedNode: TreeNode | null = null;
-
 
 function onFocusIn() {
   window.addEventListener('keydown', onKeyDown);
@@ -68,53 +90,52 @@ function onKeyDown(event: KeyboardEvent) {
   const keyCode = event.code;
   if (keyCode === 'ArrowDown' || keyCode === 'ArrowUp') {
     event.preventDefault();
-    onSelectionMoved(keyCode === 'ArrowUp' ? -1 : 1)
+    onSelectionMoved(keyCode === 'ArrowUp' ? -1 : 1);
   }
 }
 
 function onNodeExpand(node: TreeNode) {
-  emits("nodeExpand", node)
+  emits('nodeExpand', node);
 }
 
 function onNodeCollapse(node: TreeNode) {
-  emits("nodeCollapse", node)
+  emits('nodeCollapse', node);
 }
 
 function onSelectionMoved(direction: number) {
   if (selectedItems.length === 0) {
-    return
-  }
-
-  let currentSelectedItem = selectedItems[0];
-  data.expanded = true;
-  let visibleItems = flattenVisibleTree(data)
-  let index = findIndexByPath(visibleItems, currentSelectedItem.path)
-
-  let newIndex = index + direction;
-  // 0 is root node
-  if (newIndex == 0 || newIndex == visibleItems.length) {
     return;
   }
 
-  selectedItems.forEach(n => n.selected = false)
+  const currentSelectedItem = selectedItems[0];
+  data.expanded = true;
+  const visibleItems = flattenVisibleTree(data);
+  const index = findIndexByPath(visibleItems, currentSelectedItem.path);
 
-  let newSelectedItem = visibleItems[newIndex];
+  const newIndex = index + direction;
+  // 0 is root node
+  if (newIndex === 0 || newIndex === visibleItems.length) {
+    return;
+  }
+
+  selectedItems.forEach((n) => (n.selected = false));
+
+  const newSelectedItem = visibleItems[newIndex];
   newSelectedItem.selected = true;
-  selectedItems = [newSelectedItem]
+  selectedItems = [newSelectedItem];
 }
 
 function onNodeContextmenu(event: MouseEvent, nodeData: TreeNode) {
   if (focusedNode !== null) {
     focusedNode.focused = false;
   }
+  // eslint-disable-next-line no-param-reassign
   nodeData.focused = true;
   focusedNode = nodeData;
-  emits("nodeContextmenu", event, nodeData)
+  emits('nodeContextmenu', event, nodeData);
 }
 
-
 function onNodeRename(node: TreeNode, title: string) {
-
   const oldTitle = node.title;
   const oldPath = node.path;
   const dir = dirname(oldPath);
@@ -127,38 +148,39 @@ function onNodeRename(node: TreeNode, title: string) {
 }
 
 function onFileCreate(node: TreeNode, title: string) {
-
-  let newOne: TreeNode = {
+  const newOne: TreeNode = {
     title,
-    path: node.path + "/" + title,
-    type: "file"
-  }
+    path: `${node.path}/${title}`,
+    type: 'file',
+  };
 
   if (!node.children) {
-    node.children = []
+    // eslint-disable-next-line no-param-reassign
+    node.children = [];
   }
-  node.children.unshift(newOne)
+  node.children.unshift(newOne);
 
   emits('fileCreate', node, title);
 }
 
 function onFolderCreate(node: TreeNode, title: string) {
-  let newOne: TreeNode = {
+  const newOne: TreeNode = {
     title,
-    path: node.path + "/" + title,
-    type: "folder"
-  }
+    path: `${node.path}/${title}`,
+    type: 'folder',
+  };
 
   if (!node.children) {
-    node.children = []
+    // eslint-disable-next-line no-param-reassign
+    node.children = [];
   }
-  node.children.unshift(newOne)
+  node.children.unshift(newOne);
 
   emits('folderCreate', node, title);
 }
 
 function onNodeSelect(event: MouseEvent, item: TreeNode) {
-  const {path} = item
+  const { path } = item;
 
   if (focusedNode !== null) {
     focusedNode.focused = false;
@@ -171,43 +193,42 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
 
   if (isCtrlOrCmdSelect) {
     // If the user is holding Ctrl or Cmd key
-    const findIndex = selectedItems.findIndex(item => path === item.path)
+    const findIndex = selectedItems.findIndex((item) => path === item.path);
     if (findIndex > -1) {
-      selectedItems.splice(findIndex, 1)
+      selectedItems.splice(findIndex, 1);
+      // eslint-disable-next-line no-param-reassign
       item.selected = false;
-
     } else {
-      selectedItems.push(item)
+      selectedItems.push(item);
+      // eslint-disable-next-line no-param-reassign
       item.selected = true;
     }
-
   } else if (isShiftSelect) {
-
-    let visibleItems = flattenVisibleTree(data);
+    const visibleItems = flattenVisibleTree(data);
     let lastIndex;
-    let lastSelectedItem = selectedItems.pop();
+    const lastSelectedItem = selectedItems.pop();
     if (lastSelectedItem) {
       const lastSelectPath = lastSelectedItem.path;
-      lastIndex = visibleItems.findIndex(i => i.path === lastSelectPath);
+      lastIndex = visibleItems.findIndex((i) => i.path === lastSelectPath);
     } else {
       lastIndex = 1;
     }
 
-    const currentIndex = visibleItems.findIndex(i => path === i.path);
-    let minIndex = Math.min(lastIndex, currentIndex);
-    let maxIndex = Math.max(lastIndex, currentIndex);
+    const currentIndex = visibleItems.findIndex((i) => path === i.path);
+    const minIndex = Math.min(lastIndex, currentIndex);
+    const maxIndex = Math.max(lastIndex, currentIndex);
 
-    let newSelected = visibleItems.slice(minIndex, maxIndex + 1);
-    selectedItems.push(...newSelected)
+    const newSelected = visibleItems.slice(minIndex, maxIndex + 1);
+    selectedItems.push(...newSelected);
 
-    newSelected.forEach(s => s.selected = true)
-
+    newSelected.forEach((s) => (s.selected = true));
   } else {
-    for (let node of selectedItems) {
+    for (const node of selectedItems) {
       node.selected = false;
     }
-    selectedItems.splice(0, selectedItems.length)
+    selectedItems.splice(0, selectedItems.length);
     selectedItems.push(item);
+    // eslint-disable-next-line no-param-reassign
     item.selected = true;
   }
 
@@ -215,13 +236,12 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
 }
 
 function onNodeDrop() {
-
   if (ddo.drop.path === ddo.drag.path) {
-    return
+    return;
   }
 
-  let dragItem = findNodeByPath(data, ddo.drag.path)
-  let dropItem = findNodeByPath(data, ddo.drop.path)
+  const dragItem = findNodeByPath(data, ddo.drag.path);
+  const dropItem = findNodeByPath(data, ddo.drop.path);
   if (!dragItem || !dropItem) {
     return;
   }
@@ -232,13 +252,13 @@ function onNodeDrop() {
   }
 
   // for an expanded folder, there is no below position
-  if (dropItem.type === "folder" && dropItem.expanded && ddo.position == Position.BELOW) {
+  if (dropItem.type === 'folder' && dropItem.expanded && ddo.position === Position.BELOW) {
     return;
   }
 
   // remove from source
-  let dragParent = findParentNodeByPath(data, dragItem.path);
-  if (!dragParent || !dragParent.children) {
+  const dragParent = findParentNodeByPath(data, dragItem.path);
+  if (!dragParent?.children) {
     return;
   }
   for (let i = 0; i < dragParent.children.length; i++) {
@@ -248,7 +268,7 @@ function onNodeDrop() {
   }
 
   const oldPath = dragItem?.path;
-  const title = dragItem?.title
+  const title = dragItem?.title;
   let newPath;
 
   if (ddo.position === Position.IN) {
@@ -256,11 +276,11 @@ function onNodeDrop() {
     if (!dropItem.children) {
       dropItem.children = [];
     }
-    dropItem.children.push(dragItem)
+    dropItem.children.push(dragItem);
 
     newPath = join(dropItem.path, title);
   } else {
-    let dropItemParent = findParentNodeByPath(data, dropItem.path)
+    const dropItemParent = findParentNodeByPath(data, dropItem.path);
     if (!dropItemParent) {
       return;
     }
@@ -273,22 +293,22 @@ function onNodeDrop() {
       index = index + 1;
     }
 
-    dropItemParent.children.splice(index, 0, dragItem)
+    dropItemParent.children.splice(index, 0, dragItem);
 
-    newPath = join(dropItemParent.path, title)
+    newPath = join(dropItemParent.path, title);
   }
 
-  emits("nodeDrop", newPath, oldPath);
+  emits('nodeDrop', newPath, oldPath);
 
   if (newPath !== oldPath) {
-    emits("nodeMove", newPath, oldPath);
+    emits('nodeMove', newPath, oldPath);
   }
-
 }
 </script>
+
 <style scoped>
 .file-tree-view {
-  outline: none
+  outline: none;
 }
 
 .file-tree-view ul {

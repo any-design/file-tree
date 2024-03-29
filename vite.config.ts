@@ -1,11 +1,21 @@
 // filename: vite.config.ts
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import * as path from "path";
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+
+import dts from 'vite-plugin-dts';
+import * as path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    dts({
+      tsconfigPath: 'tsconfig.app.json',
+      staticImport: true,
+      insertTypesEntry: true,
+      rollupTypes: true,
+    }),
+  ],
   build: {
     rollupOptions: {
       // 请确保外部化那些你的库中不需要的依赖
@@ -18,14 +28,17 @@ export default defineConfig({
       },
     },
     lib: {
-      entry:  './packages/index.ts',
-      fileName: (format) => `markhu-file-tree.${format}.js`,
-      name: 'markhu-file-tree',
+      entry: './packages/index.ts',
+      fileName: (format) => `file-tree.${format}.js`,
+      name: 'file-tree',
     },
+    target: 'esnext',
+    minify: false,
+    sourcemap: true,
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src")
-    }
-  }
-})
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
+});

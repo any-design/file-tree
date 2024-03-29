@@ -1,0 +1,9 @@
+.history/
+node_modules/
+dist/
+**/*.min.js
+**/*-min.js
+**/*.bundle.js
+.eslintrc.js
+.prettierrc.js
+*.config.ts

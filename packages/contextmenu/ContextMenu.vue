@@ -10,86 +10,78 @@
   </Teleport>
 </template>
 <script setup lang="ts">
-import { ref, computed, nextTick, watch, onMounted, provide } from "vue"
-const contextmenuRef = ref<HTMLDivElement | null>(null)
-import useClickOutside from "./UseClickOutSide"
+import { ref, computed, nextTick, provide } from 'vue';
+import useClickOutside from './UseClickOutside';
 
-const visible = ref(false)
-let contextData:any = null;
+const contextmenuRef = ref<HTMLDivElement | null>(null);
+const visible = ref(false);
 
-const emits =  defineEmits(["menuitem-click"])
+let contextData: any = null;
 
-function onMenuItemClicked(menuId:string){
+const emits = defineEmits(['menuitem-click']);
 
-  emits("menuitem-click",contextData, menuId);
-  visible.value=false
+function onMenuItemClicked(menuId: string) {
+  emits('menuitem-click', contextData, menuId);
+  visible.value = false;
 }
 
-provide("onMenuItemClicked", onMenuItemClicked)
+provide('onMenuItemClicked', onMenuItemClicked);
 
 const position = ref({
   top: 0,
-  left: 0
-})
+  left: 0,
+});
 
-const style = computed(() => {
-  return {
-    left: position.value.left + "px",
-    top: position.value.top + "px"
-  }
-})
+const style = computed(() => ({
+  left: `${position.value.left}px`,
+  top: `${position.value.top}px`,
+}));
 
 const hide = () => {
-  visible.value = false
-}
+  visible.value = false;
+};
 // 计算x,y的偏移值
-const calculatePosition = (axis: "X" | "Y", mousePos: number, elSize: number) => {
-  const windowSize = axis === "X" ? window.innerWidth : window.innerHeight
-  const scrollPos = axis === "X" ? window.scrollX : window.scrollY
+const calculatePosition = (axis: 'X' | 'Y', mousePos: number, elSize: number) => {
+  const windowSize = axis === 'X' ? window.innerWidth : window.innerHeight;
+  const scrollPos = axis === 'X' ? window.scrollX : window.scrollY;
 
-  let pos = mousePos - scrollPos
+  let pos = mousePos - scrollPos;
   if (pos + elSize > windowSize) {
-    pos = Math.max(0, pos - elSize)
+    pos = Math.max(0, pos - elSize);
   }
 
-  return pos + scrollPos
-}
-useClickOutside(
-    contextmenuRef,
-    () => {
-      hide()
-    }
-)
+  return pos + scrollPos;
+};
+useClickOutside(contextmenuRef, () => {
+  hide();
+});
 
-const show = async (e: MouseEvent,data:any) => {
-  e.preventDefault()
-  visible.value = true
-  contextData=data;
-  await nextTick()
-  const el = contextmenuRef.value
+const show = async (e: MouseEvent, data: any) => {
+  e.preventDefault();
+  visible.value = true;
+  contextData = data;
+  await nextTick();
+  const el = contextmenuRef.value;
   if (!el) {
-    return
+    return;
   }
-  const width = el.clientWidth
-  const height = el.clientHeight
-  const { pageX: x, pageY: y } = e
-  position.value.top = calculatePosition("Y", y, height)
-  position.value.left = calculatePosition("X", x, width)
-}
-
+  const width = el.clientWidth;
+  const height = el.clientHeight;
+  const { pageX: x, pageY: y } = e;
+  position.value.top = calculatePosition('Y', y, height);
+  position.value.left = calculatePosition('X', x, width);
+};
 
 defineExpose({
   show,
-  hide
-})
+  hide,
+});
 </script>
-<style  scoped>
+<style scoped>
 .contextMenu-wrapper {
   z-index: 9999;
   background-color: transparent;
 }
-
-
 
 .contextMenu {
   position: absolute;
@@ -104,10 +96,12 @@ defineExpose({
   min-width: 10px;
   word-wrap: break-word;
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s;
 }
+
 .fade-enter,
 .fade-leave-to {
   opacity: 0;

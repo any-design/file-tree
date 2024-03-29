@@ -1,26 +1,26 @@
 <template>
   <div class="context-item" @click="handleClick">
-    <slot/>
+    <slot />
   </div>
 </template>
 
 <script lang="ts" setup>
-import {inject} from "vue";
+import { inject } from 'vue';
 
-const {menuId} = defineProps({
+const { menuId } = defineProps({
   // 数据源列表
   menuId: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 // const emit = defineEmits(["click"])
 
-const onMenuItemClicked = inject("onMenuItemClicked") as Function
+const onMenuItemClicked = inject('onMenuItemClicked') as Function;
 const handleClick = () => {
   onMenuItemClicked(menuId);
-}
+};
 </script>
 
 <style>
@@ -36,7 +36,6 @@ const handleClick = () => {
   color: #606266;
   cursor: pointer;
   outline: none;
-
 }
 
 .context-item.is-hover {
