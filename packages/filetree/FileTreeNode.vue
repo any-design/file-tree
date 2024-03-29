@@ -90,7 +90,7 @@
 
         <FileTreeNode
           v-for="item in nodeDataInner.children"
-          :key="item.path"
+          :key="`${item.title}_${item.path}`"
           :node-data="item"
           :level="props.level + 1"
           :level-margin="levelMargin"
