@@ -122,7 +122,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch, type PropType } from 'vue';
+import { inject, nextTick, reactive, ref, watch, type PropType, watchEffect } from 'vue';
 import type { DragDropObject, TreeNode } from './types';
 import { Position } from './types';
 
@@ -151,7 +151,11 @@ defineSlots<{
   icon: (props: { nodeData: TreeNode }) => void;
 }>();
 
-const nodeDataInner = reactive(props.nodeData);
+let nodeDataInner = reactive(props.nodeData);
+
+watchEffect(() => {
+  nodeDataInner = reactive(props.nodeData);
+});
 
 const ddo = inject('ddo') as DragDropObject;
 
