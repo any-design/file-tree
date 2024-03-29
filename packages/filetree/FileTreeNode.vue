@@ -21,10 +21,10 @@
       @dragover.stop.prevent="onDragOver"
       @dragleave.stop="onDragLeave"
       @drop.stop="onDrop"
-      @click="onNodeSelect($event, nodeData)"
+      @click.stop="onNodeSelect($event, nodeData)"
     >
       <div :style="{ 'margin-left': (props.level < 3 ? 0 : (props.level - 2) * 28) + 'px' }" :class="[dragOverClass]">
-        <span v-if="nodeData.type === 'folder'" @click.stop="onNodeToggle" class="icon" @dragover.prevent>
+        <span v-if="nodeData.type === 'folder'" class="icon" @dragover.prevent>
           <slot name="toggler" :nodeData="nodeData">
             <template v-if="nodeData.expanded">-</template>
             <template v-else>+</template>
@@ -230,6 +230,14 @@ function onNodeDrop() {
 }
 
 function onNodeSelect(e: MouseEvent, nodeData: TreeNode) {
+  const isCtrlOrCmdSelect = e.ctrlKey || e.metaKey;
+  const isShiftSelect = e.shiftKey;
+
+  if (nodeData.type === 'folder' && !isCtrlOrCmdSelect && !isShiftSelect && nodeData.path === props.nodeData.path) {
+    onNodeToggle();
+    if (!props.draggable) return;
+  }
+
   emits('nodeSelect', e, nodeData);
 }
 

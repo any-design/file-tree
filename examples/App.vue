@@ -34,7 +34,6 @@
         @nodeDrop="onNodeDrop"
         @nodeMove="onNodeMove"
         @nodeContextmenu="onNodeContextmenu"
-        draggable
       >
         <template v-slot:title="{ nodeData }">{{ nodeData.title }}</template>
         <template v-slot:toggler="{ nodeData }">

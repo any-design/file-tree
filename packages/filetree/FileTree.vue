@@ -191,7 +191,7 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
   const isCtrlOrCmdSelect = event.ctrlKey || event.metaKey;
   const isShiftSelect = event.shiftKey;
 
-  if (isCtrlOrCmdSelect) {
+  if (isCtrlOrCmdSelect && props.draggable) {
     // If the user is holding Ctrl or Cmd key
     const findIndex = selectedItems.findIndex((item) => path === item.path);
     if (findIndex > -1) {
@@ -203,7 +203,7 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
       // eslint-disable-next-line no-param-reassign
       item.selected = true;
     }
-  } else if (isShiftSelect) {
+  } else if (isShiftSelect && props.draggable) {
     const visibleItems = flattenVisibleTree(data);
     let lastIndex;
     const lastSelectedItem = selectedItems.pop();
@@ -221,6 +221,7 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
     const newSelected = visibleItems.slice(minIndex, maxIndex + 1);
     selectedItems.push(...newSelected);
 
+    // eslint-disable-next-line no-param-reassign
     newSelected.forEach((s) => (s.selected = true));
   } else {
     for (const node of selectedItems) {

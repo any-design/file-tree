@@ -15,8 +15,6 @@ const { menuId } = defineProps({
   },
 });
 
-// const emit = defineEmits(["click"])
-
 const onMenuItemClicked = inject('onMenuItemClicked') as Function;
 const handleClick = () => {
   onMenuItemClicked(menuId);
