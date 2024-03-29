@@ -24,7 +24,7 @@
     "build": "run-p type-check build-only",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
+    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
     "lint": "eslint ./packages --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "lint-fix": "eslint --ext .js,.vue,.ts ./packages --fix"
   },
