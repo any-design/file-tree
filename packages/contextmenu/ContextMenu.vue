@@ -90,20 +90,27 @@ defineExpose({
   padding: 5px 0;
   margin: 0;
   background-color: #ffffff;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 12px;
   line-height: 20px;
   min-width: 10px;
   word-wrap: break-word;
+  overflow: hidden;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s;
+  transition: opacity 0.1s;
 }
 
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  .contextMenu {
+    background-color: #2e2e2e;
+  }
 }
 </style>

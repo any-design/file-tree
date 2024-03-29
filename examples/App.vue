@@ -67,7 +67,7 @@
     <div class="child child1">
       <div class="title">Logs</div>
       <ol reversed>
-        <li v-for="item in logs" :key="item">{{ item }}</li>
+        <li class="log" v-for="item in logs" :key="item">{{ item }}</li>
       </ol>
     </div>
   </div>
@@ -254,5 +254,10 @@ const treeData2 = reactive(JSON.parse(JSON.stringify(data)));
 
 .child1 {
   flex: 1;
+}
+
+.log {
+  font-size: 12px;
+  font-family: monospace;
 }
 </style>
