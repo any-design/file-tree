@@ -23,7 +23,10 @@
       @drop.stop="onDrop"
       @click.stop="onNodeSelect($event, nodeData)"
     >
-      <div :style="{ 'margin-left': (props.level < 3 ? 0 : (props.level - 2) * 28) + 'px' }" :class="[dragOverClass]">
+      <div
+        :style="{ 'margin-left': (props.level < 3 ? 0 : (props.level - 2) * levelMargin) + 'px' }"
+        :class="[dragOverClass]"
+      >
         <span v-if="nodeData.type === 'folder'" class="icon" @dragover.prevent>
           <slot name="toggler" :nodeData="nodeData">
             <template v-if="nodeData.expanded">-</template>
@@ -56,7 +59,7 @@
       <template v-if="nodeData.addingFolder || nodeData.addingFile || nodeData.expanded || nodeData.path === '/'">
         <li
           v-if="nodeData.type === 'folder' && (nodeData.addingFile || nodeData.addingFolder)"
-          :style="{ 'padding-left': (props.level < 2 ? 0 : (props.level - 1) * 28) + 'px' }"
+          :style="{ 'padding-left': (props.level < 2 ? 0 : (props.level - 1) * levelMargin) + 'px' }"
         >
           <template v-if="nodeData.addingFolder">
             <input
@@ -130,6 +133,10 @@ const props = defineProps({
   draggable: {
     type: Boolean,
     default: false,
+  },
+  levelMargin: {
+    type: Number,
+    default: 28,
   },
 });
 

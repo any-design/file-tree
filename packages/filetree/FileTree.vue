@@ -5,6 +5,7 @@
         :node-data="data"
         :level="1"
         :draggable="draggable"
+        :level-margin="28"
         @nodeDrop="onNodeDrop"
         @nodeSelect="onNodeSelect"
         @fileCreate="onFileCreate"
@@ -64,6 +65,10 @@ const props = defineProps({
   draggable: {
     type: Boolean,
     default: false,
+  },
+  levelMargin: {
+    type: Number,
+    default: 28,
   },
 });
 
