@@ -2,7 +2,7 @@
   <div class="file-tree-view" @focusin="onFocusIn" @focusout="onFocusOut" tabindex="0">
     <ul>
       <FileTreeNode
-        :node-data="data"
+        :node-data="treeData"
         :level="1"
         :draggable="draggable"
         :level-margin="28"
@@ -31,7 +31,7 @@
 
 <script lang="ts" setup>
 import FileTreeNode from './FileTreeNode.vue';
-import { provide, reactive } from 'vue';
+import { provide, reactive, watch } from 'vue';
 import type { DragDropObject, TreeNode } from './types';
 import { Position } from './types';
 import { dirname, findIndexByPath, findNodeByPath, findParentNodeByPath, flattenVisibleTree, join } from './utils';
@@ -72,13 +72,21 @@ const props = defineProps({
   },
 });
 
-const data: TreeNode = reactive({
+const treeData: TreeNode = reactive({
   title: '/',
   path: '/',
   type: 'folder',
   expanded: true,
   children: props.data,
 });
+
+// when outside data changed, modify the inner data
+watch(
+  () => props.data,
+  () => {
+    treeData.children = props.data;
+  },
+);
 
 let selectedItems = [] as TreeNode[];
 let focusedNode: TreeNode | null = null;
@@ -113,8 +121,8 @@ function onSelectionMoved(direction: number) {
   }
 
   const currentSelectedItem = selectedItems[0];
-  data.expanded = true;
-  const visibleItems = flattenVisibleTree(data);
+  treeData.expanded = true;
+  const visibleItems = flattenVisibleTree(treeData);
   const index = findIndexByPath(visibleItems, currentSelectedItem.path);
 
   const newIndex = index + direction;
@@ -213,7 +221,7 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
       item.selected = true;
     }
   } else if (isShiftSelect && props.draggable) {
-    const visibleItems = flattenVisibleTree(data);
+    const visibleItems = flattenVisibleTree(treeData);
     let lastIndex;
     const lastSelectedItem = selectedItems.pop();
     if (lastSelectedItem) {
@@ -250,8 +258,8 @@ function onNodeDrop() {
     return;
   }
 
-  const dragItem = findNodeByPath(data, ddo.drag.path);
-  const dropItem = findNodeByPath(data, ddo.drop.path);
+  const dragItem = findNodeByPath(treeData, ddo.drag.path);
+  const dropItem = findNodeByPath(treeData, ddo.drop.path);
   if (!dragItem || !dropItem) {
     return;
   }
@@ -267,7 +275,7 @@ function onNodeDrop() {
   }
 
   // remove from source
-  const dragParent = findParentNodeByPath(data, dragItem.path);
+  const dragParent = findParentNodeByPath(treeData, dragItem.path);
   if (!dragParent?.children) {
     return;
   }
@@ -290,7 +298,7 @@ function onNodeDrop() {
 
     newPath = join(dropItem.path, title);
   } else {
-    const dropItemParent = findParentNodeByPath(data, dropItem.path);
+    const dropItemParent = findParentNodeByPath(treeData, dropItem.path);
     if (!dropItemParent) {
       return;
     }
