@@ -24,7 +24,7 @@
       @click.stop="onNodeSelect($event, nodeData)"
     >
       <div
-        :style="{ 'margin-left': (props.level < 3 ? 0 : (props.level - 2) * levelMargin) + 'px' }"
+        :style="{ 'margin-left': (props.level < 3 ? 0 : (props.level - 2) * props.levelMargin) + 'px' }"
         :class="[dragOverClass]"
       >
         <span v-if="nodeData.type === 'folder'" class="icon" @dragover.prevent>
@@ -59,7 +59,7 @@
       <template v-if="nodeData.addingFolder || nodeData.addingFile || nodeData.expanded || nodeData.path === '/'">
         <li
           v-if="nodeData.type === 'folder' && (nodeData.addingFile || nodeData.addingFolder)"
-          :style="{ 'padding-left': (props.level < 2 ? 0 : (props.level - 1) * levelMargin) + 'px' }"
+          :style="{ 'padding-left': (props.level < 2 ? 0 : (props.level - 1) * props.levelMargin) + 'px' }"
         >
           <template v-if="nodeData.addingFolder">
             <input
@@ -89,6 +89,7 @@
           :key="item.title"
           :node-data="item"
           :level="props.level + 1"
+          :level-margin="levelMargin"
           :draggable="draggable"
           @nodeDrop="onNodeDrop"
           @nodeSelect="onNodeSelect"
