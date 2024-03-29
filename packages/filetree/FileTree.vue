@@ -31,7 +31,7 @@
 
 <script lang="ts" setup>
 import FileTreeNode from './FileTreeNode.vue';
-import { provide, reactive, watch } from 'vue';
+import { provide, reactive } from 'vue';
 import type { DragDropObject, TreeNode } from './types';
 import { Position } from './types';
 import { dirname, findIndexByPath, findNodeByPath, findParentNodeByPath, flattenVisibleTree, join } from './utils';
@@ -79,14 +79,6 @@ const treeData: TreeNode = reactive({
   expanded: true,
   children: props.data,
 });
-
-// when outside data changed, modify the inner data
-watch(
-  () => props.data,
-  () => {
-    treeData.children = props.data;
-  },
-);
 
 let selectedItems = [] as TreeNode[];
 let focusedNode: TreeNode | null = null;

@@ -4,80 +4,84 @@
     class="file-tree-node"
     @dragstart.stop="onDragStart"
     @dragend.stop="onDragEnd"
-    @contextmenu.stop.prevent="onNodeContextmenu($event, nodeData)"
+    @contextmenu.stop.prevent="onNodeContextmenu($event, nodeDataInner)"
   >
     <div
-      v-show="nodeData.path !== '/'"
+      v-show="nodeDataInner.path !== '/'"
       :class="[
         'node-block',
         {
-          selected: nodeData.selected,
-          focused: nodeData.focused,
-          leaf: !nodeData.children?.length,
-          folder: nodeData.type === 'folder',
+          selected: nodeDataInner.selected,
+          focused: nodeDataInner.focused,
+          leaf: !nodeDataInner.children?.length,
+          folder: nodeDataInner.type === 'folder',
         },
       ]"
       @dragenter.stop
       @dragover.stop.prevent="onDragOver"
       @dragleave.stop="onDragLeave"
       @drop.stop="onDrop"
-      @click.stop="onNodeSelect($event, nodeData)"
+      @click.stop="onNodeSelect($event, nodeDataInner)"
     >
       <div
         :style="{ 'margin-left': (props.level < 3 ? 0 : (props.level - 2) * props.levelMargin) + 'px' }"
         :class="[dragOverClass]"
       >
-        <span v-if="nodeData.type === 'folder'" class="icon" @dragover.prevent>
-          <slot name="toggler" :nodeData="nodeData">
-            <template v-if="nodeData.expanded">-</template>
+        <span v-if="nodeDataInner.type === 'folder'" class="icon" @dragover.prevent>
+          <slot name="toggler" :nodeData="nodeDataInner">
+            <template v-if="nodeDataInner.expanded">-</template>
             <template v-else>+</template>
           </slot>
         </span>
         <span>
-          <slot name="icon" :nodeData="nodeData">
-            <template v-if="nodeData.type === 'folder'">[D]</template>
+          <slot name="icon" :nodeData="nodeDataInner">
+            <template v-if="nodeDataInner.type === 'folder'">[D]</template>
             <template v-else>[F]</template>
           </slot>
         </span>
 
-        <template v-if="nodeData.editing">
+        <template v-if="nodeDataInner.editing">
           <input
             type="text"
-            @blur="onNodeRename(nodeData, newName)"
+            @blur="onNodeRename(nodeDataInner, newName)"
             v-on:keyup.esc="onEditingEsc"
-            v-on:keydown.enter="onNodeRename(nodeData, newName)"
+            v-on:keydown.enter="onNodeRename(nodeDataInner, newName)"
             ref="editingInputRef"
             v-model="newName"
           />
         </template>
-        <slot name="title" :nodeData="nodeData" v-else>
-          <span class="title">{{ nodeData.title }}</span>
+        <slot name="title" :nodeData="nodeDataInner" v-else>
+          <span class="title">{{ nodeDataInner.title }}</span>
         </slot>
       </div>
     </div>
     <ul>
-      <template v-if="nodeData.addingFolder || nodeData.addingFile || nodeData.expanded || nodeData.path === '/'">
+      <template
+        v-if="
+          nodeDataInner.addingFolder || nodeDataInner.addingFile || nodeDataInner.expanded || nodeDataInner.path === '/'
+        "
+      >
         <li
-          v-if="nodeData.type === 'folder' && (nodeData.addingFile || nodeData.addingFolder)"
+          v-if="nodeDataInner.type === 'folder' && (nodeDataInner.addingFile || nodeDataInner.addingFolder)"
           :style="{ 'padding-left': (props.level < 2 ? 0 : (props.level - 1) * props.levelMargin) + 'px' }"
         >
-          <template v-if="nodeData.addingFolder">
+          <template v-if="nodeDataInner.addingFolder">
             <input
               type="text"
               ref="addingFolderInputRef"
-              @blur="onFolderCreate(nodeData, newFolderName)"
-              v-on:keydown.enter="onFolderCreate(nodeData, newFolderName)"
+              @blur="onFolderCreate(nodeDataInner, newFolderName)"
+              v-on:keydown.enter="onFolderCreate(nodeDataInner, newFolderName)"
               v-on:keyup.esc="onFolderEsc"
               v-model="newFolderName"
             />
           </template>
 
-          <template v-if="nodeData.addingFile">
+          <template v-if="nodeDataInner.addingFile">
             <input
               type="text"
               ref="addingFileInputRef"
-              @blur="onFileCreate(nodeData, newFileName)"
-              v-on:keydown.enter="onFileCreate(nodeData, newFileName)"
+              @blur="onFileCreate(nodeDataInner, newFileName)"
+              v-on:keydown.enter="onFileCreate(nodeDataInner, newFileName)"
               v-on:keyup.esc="onFileEsc"
               v-model="newFileName"
             />
@@ -85,7 +89,7 @@
         </li>
 
         <FileTreeNode
-          v-for="item in nodeData.children"
+          v-for="item in nodeDataInner.children"
           :key="item.title"
           :node-data="item"
           :level="props.level + 1"
@@ -147,7 +151,7 @@ defineSlots<{
   icon: (props: { nodeData: TreeNode }) => void;
 }>();
 
-const nodeData = reactive(props.nodeData);
+const nodeDataInner = reactive(props.nodeData);
 
 const ddo = inject('ddo') as DragDropObject;
 
@@ -158,13 +162,13 @@ const dragOverClass = ref('');
 
 const newFileName = ref('');
 const newFolderName = ref('');
-const newName = ref(nodeData.title);
+const newName = ref(nodeDataInner.title);
 
 watch(
-  () => nodeData.editing,
+  () => nodeDataInner.editing,
   async (newValue) => {
     if (newValue) {
-      newName.value = nodeData?.title;
+      newName.value = nodeDataInner?.title;
       await nextTick();
       editingInputRef.value.focus();
     }
@@ -172,7 +176,7 @@ watch(
 );
 
 watch(
-  () => nodeData.addingFolder,
+  () => nodeDataInner.addingFolder,
   async (newValue) => {
     if (newValue) {
       newFolderName.value = '';
@@ -183,7 +187,7 @@ watch(
 );
 
 watch(
-  () => nodeData.addingFile,
+  () => nodeDataInner.addingFile,
   async (newValue) => {
     if (newValue) {
       newFileName.value = '';
@@ -209,12 +213,12 @@ const emits = defineEmits([
 ]);
 
 function onNodeToggle() {
-  nodeData.expanded = !nodeData.expanded;
+  nodeDataInner.expanded = !nodeDataInner.expanded;
 
-  if (nodeData.expanded) {
-    emits('nodeExpand', nodeData);
+  if (nodeDataInner.expanded) {
+    emits('nodeExpand', nodeDataInner);
   } else {
-    emits('nodeCollapse', nodeData);
+    emits('nodeCollapse', nodeDataInner);
   }
 }
 
@@ -230,7 +234,7 @@ function onNodeRename(node: TreeNode, name: string) {
 }
 
 function onEditingEsc() {
-  nodeData.editing = false;
+  nodeDataInner.editing = false;
 }
 
 function onNodeDrop() {
@@ -262,8 +266,8 @@ function onFileCreate(nodeData: TreeNode, newFileName: string) {
 }
 
 function onFileEsc() {
-  nodeData.expanded = true;
-  nodeData.addingFile = false;
+  nodeDataInner.expanded = true;
+  nodeDataInner.addingFile = false;
 }
 
 function onFolderCreate(nodeData: TreeNode, newFileName: string) {
@@ -280,8 +284,8 @@ function onFolderCreate(nodeData: TreeNode, newFileName: string) {
 }
 
 function onFolderEsc() {
-  nodeData.expanded = true;
-  nodeData.addingFolder = false;
+  nodeDataInner.expanded = true;
+  nodeDataInner.addingFolder = false;
 }
 
 function onNodeExpand(nodeData: TreeNode) {
@@ -293,7 +297,7 @@ function onNodeCollapse(nodeData: TreeNode) {
 }
 
 function onDragStart() {
-  ddo.drag = nodeData;
+  ddo.drag = nodeDataInner;
 }
 
 function onDragOver(e: DragEvent) {
@@ -301,17 +305,17 @@ function onDragOver(e: DragEvent) {
     e.dataTransfer.dropEffect = 'move';
   }
 
-  if (nodeData?.path === ddo.drag.path) {
+  if (nodeDataInner?.path === ddo.drag.path) {
     return;
   }
 
-  const position = calculateDropPosition(e, nodeData?.type);
+  const position = calculateDropPosition(e, nodeDataInner?.type);
   ddo.position = position;
   if (position === Position.ABOVE) {
     dragOverClass.value = 'tree-drag-over-top';
   } else if (position === Position.BELOW) {
     // when a folder is expanded, there is no below position
-    if (nodeData.type === 'file' || !nodeData.expanded) {
+    if (nodeDataInner.type === 'file' || !nodeDataInner.expanded) {
       dragOverClass.value = 'tree-drag-over-bottom';
     }
   } else {
@@ -362,7 +366,7 @@ function onDragLeave() {
 }
 
 function onDrop() {
-  ddo.drop = nodeData;
+  ddo.drop = nodeDataInner;
   emits('nodeDrop');
   dragOverClass.value = '';
 

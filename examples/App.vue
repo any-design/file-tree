@@ -232,6 +232,31 @@ const data = [
 ];
 
 const treeData1 = reactive(JSON.parse(JSON.stringify(data)));
+
+setTimeout(() => {
+  treeData1.push({
+    title: 'Movies',
+    path: '/users/Jim/Movies',
+    type: 'folder',
+    children: [
+      {
+        title: 'Video1.mp4',
+        path: '/users/Jim/videos/Video1.mp4',
+        type: 'file',
+      },
+      {
+        title: 'Video2.mp4',
+        path: '/users/Jim/videos/Video2.mp4',
+        type: 'file',
+      },
+    ],
+  });
+}, 3000);
+
+setTimeout(() => {
+  treeData1[treeData1.length - 1].children[0].title = 'Video TTTT.mp4';
+}, 8000);
+
 const treeData2 = reactive(JSON.parse(JSON.stringify(data)));
 </script>
 <style>
