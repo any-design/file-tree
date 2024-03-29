@@ -118,6 +118,7 @@ function onSelectionMoved(direction: number) {
     return;
   }
 
+  // eslint-disable-next-line no-param-reassign
   selectedItems.forEach((n) => (n.selected = false));
 
   const newSelectedItem = visibleItems[newIndex];
@@ -141,8 +142,11 @@ function onNodeRename(node: TreeNode, title: string) {
   const dir = dirname(oldPath);
   const newPath = join(dir, title);
 
+  // eslint-disable-next-line no-param-reassign
   node.title = title;
+  // eslint-disable-next-line no-param-reassign
   node.path = newPath;
+  // eslint-disable-next-line no-param-reassign
   node.editing = false;
   emits('nodeRename', node, title, oldTitle, newPath, oldPath);
 }
