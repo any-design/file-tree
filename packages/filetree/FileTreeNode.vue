@@ -375,11 +375,11 @@ function onDragEnd() {
 
 .file-tree-node .leaf:hover,
 .file-tree-node .folder:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .file-tree-node .selected {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .file-tree-node .node-block {
@@ -395,20 +395,61 @@ function onDragEnd() {
 }
 
 .file-tree-node .focused {
-  border: 2px rgba(255, 255, 255, 0.2) solid;
+  border: 2px rgba(0, 0, 0, 0.1) solid;
 }
 
 .tree-drag-over {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 2px rgba(255, 255, 255, 0.2) solid;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.6);
+  border: 2px rgba(0, 0, 0, 0.1) solid;
 }
 
 .tree-drag-over-top {
-  border-top: 2px rgba(255, 255, 255, 0.2) solid !important;
+  border-top: 2px rgba(0, 0, 0, 0.1) solid !important;
 }
 
 .tree-drag-over-bottom {
-  border-bottom: 2px rgba(255, 255, 255, 0.2) solid !important;
+  border-bottom: 2px rgba(0, 0, 0, 0.1) solid !important;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  .file-tree-node .leaf:hover,
+  .file-tree-node .folder:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .file-tree-node .selected {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .file-tree-node .node-block {
+    border: 2px solid transparent;
+    font-size: 13px;
+  }
+
+  .file-tree-node .node-block .icon {
+    display: inline-block;
+    width: 16px;
+    margin-right: 2px;
+    text-align: left;
+  }
+
+  .file-tree-node .focused {
+    border: 2px rgba(255, 255, 255, 0.2) solid;
+  }
+
+  .tree-drag-over {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px rgba(255, 255, 255, 0.2) solid;
+  }
+
+  .tree-drag-over-top {
+    border-top: 2px rgba(255, 255, 255, 0.2) solid !important;
+  }
+
+  .tree-drag-over-bottom {
+    border-bottom: 2px rgba(255, 255, 255, 0.2) solid !important;
+  }
 }
 </style>

@@ -17,6 +17,7 @@
         @nodeDrop="onNodeDrop"
         @nodeMove="onNodeMove"
         @nodeContextmenu="onNodeContextmenu"
+        draggable
       >
       </file-tree>
     </div>
@@ -33,6 +34,7 @@
         @nodeDrop="onNodeDrop"
         @nodeMove="onNodeMove"
         @nodeContextmenu="onNodeContextmenu"
+        draggable
       >
         <template v-slot:title="{ nodeData }">{{ nodeData.title }}</template>
         <template v-slot:toggler="{ nodeData }">
@@ -109,12 +111,17 @@ function onNodeMove(newPath: string, oldPath: string) {
 function onMenuItemClick(node: TreeNode, menuId: string) {
   addLog('click menu', `${node.title}, ${menuId}`);
   if (menuId === 'editing') {
+    // eslint-disable-next-line no-param-reassign
     node.editing = true;
   } else if (menuId === 'addingFile') {
+    // eslint-disable-next-line no-param-reassign
     node.addingFile = true;
+    // eslint-disable-next-line no-param-reassign
     node.addingFolder = false;
   } else if (menuId === 'addingFolder') {
+    // eslint-disable-next-line no-param-reassign
     node.addingFile = false;
+    // eslint-disable-next-line no-param-reassign
     node.addingFolder = true;
   }
 }
@@ -128,11 +135,13 @@ function onNodeRename(node: TreeNode, newTitle: string, oldTitle: string) {
 }
 
 function onFolderCreate(node: TreeNode, title: string) {
+  // eslint-disable-next-line no-param-reassign
   node.addingFolder = false;
   addLog('create folder', `${node.title} -> ${title}`);
 }
 
 async function onFileCreate(node: TreeNode, title: string) {
+  // eslint-disable-next-line no-param-reassign
   node.addingFile = false;
   addLog('create file', `${node.title} -> ${title}`);
 }
