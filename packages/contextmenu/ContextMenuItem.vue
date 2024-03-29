@@ -31,17 +31,27 @@ const handleClick = () => {
   padding: 5px 16px;
   margin: 0;
   font-size: 12px;
-  color: #606266;
+  color: rgba(0, 0, 0, 0.65);
   cursor: pointer;
   outline: none;
+  user-select: none;
 }
 
-.context-item.is-hover {
-  background-color: rgb(96, 56, 17);
+.context-item:hover {
+  background-color: rgba(0, 0, 0, 0.06);
   color: #fff;
 }
 
 .context-item.is-disabled {
   cursor: not-allowed;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  .context-item {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .context-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
 }
 </style>

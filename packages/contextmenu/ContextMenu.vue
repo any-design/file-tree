@@ -89,13 +89,14 @@ defineExpose({
   left: 0;
   padding: 5px 0;
   margin: 0;
-  background-color: #ffffff;
+  background-color: #fafafa;
   border-radius: 8px;
   font-size: 12px;
   line-height: 20px;
   min-width: 10px;
   word-wrap: break-word;
   overflow: hidden;
+  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .fade-enter-active,
