@@ -1,6 +1,6 @@
 {
   "name": "@any-design/file-tree",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "dist/file-tree.umd.js",
   "module": "dist/file-tree.es.js",
   "keywords": [
