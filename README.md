@@ -21,10 +21,10 @@ This package is a customizable draggable file tree component for Vue 3 that draw
 
 ```vue
 <script setup>
-import { reactive } from 'vue';
+import { ref } from 'vue';
 import '@any-design/file-tree/dist/style.css';
 
-const treeData = reactive([
+const treeData = ref([
   {
     title: 'Documents',
     path: '/users/Jim/Documents',
@@ -63,11 +63,11 @@ const treeData = reactive([
 </script>
 
 <template>
-  <file-tree :data="treeData"></file-tree>
+  <file-tree v-model="treeData"></file-tree>
 </template>
 ```
 
-The `data` property is an object of `TreeNode` nodes:
+The `modelValue` property is an object of `TreeNode` nodes:
 
 ```typescript
 export interface TreeNode {
@@ -88,7 +88,7 @@ export interface TreeNode {
 
 | prop | type     | default | description                                       |
 | ---- | -------- | ------- | ------------------------------------------------- |
-| data | TreeNode |         | A tree to show. The root node will not show in ui |
+| modelValue | TreeNode |         | A tree to show. The root node will not show in ui |
 
 # Events
 
@@ -102,6 +102,7 @@ export interface TreeNode {
 | @nodeDrop        | newPath: string, oldPath: string                   | Triggered when a node is dragged and dropped to a new location. |
 | @nodeMove        | newPath: string, oldPath: string                   | Triggered when a node is moved to a new location.               |
 | @nodeContextmenu | e: MouseEvent, d: TreeNode                         | Triggered when a node's context menu is opened.                 |
+| @update:modelValue | node: TreeNode                         | Tree data has been updated  |
 
 # Methods
 
@@ -124,7 +125,7 @@ Note: In this example, we use Font Awesome as icon lib.
 
 ```html
 <file-tree
-  :data="treeData"
+  :v-model="treeData"
   @nodeSelect="onNodeSelect"
   @fileCreate="onFileCreate"
   @folderCreate="onFolderCreate"

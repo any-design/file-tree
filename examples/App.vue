@@ -1,13 +1,10 @@
 <template>
   <div class="container">
-    <!--    <div class="child child1">-->
-    <!--      <div class="title">Tree Data</div>-->
-    <!--      <pre>{{ treeData }}</pre>-->
-    <!--    </div>-->
     <div class="child child1">
       <div class="title">Simple Tree</div>
       <file-tree
-        :data="treeData1"
+        v-model="treeData1"
+        draggable
         @nodeSelect="onNodeSelect"
         @fileCreate="onFileCreate"
         @folderCreate="onFolderCreate"
@@ -17,14 +14,13 @@
         @nodeDrop="onNodeDrop"
         @nodeMove="onNodeMove"
         @nodeContextmenu="onNodeContextmenu"
-        draggable
       >
       </file-tree>
     </div>
     <div class="child child1">
       <div class="title">Customizable Tree</div>
       <file-tree
-        :data="treeData2"
+        v-model="treeData2"
         @nodeSelect="onNodeSelect"
         @fileCreate="onFileCreate"
         @folderCreate="onFolderCreate"
@@ -38,25 +34,25 @@
         <template v-slot:title="{ nodeData }">{{ nodeData.title }}</template>
         <template v-slot:toggler="{ nodeData }">
           <span style="margin-right: 5px">
-            <i class="fa-solid fa-chevron-down" v-if="nodeData.expanded"></i>
-            <i class="fa-solid fa-chevron-right" v-else></i>
+            <i v-if="nodeData.expanded" class="fa-solid fa-chevron-down"></i>
+            <i v-else class="fa-solid fa-chevron-right"></i>
           </span>
         </template>
         <template v-slot:icon="{ nodeData }">
           <span style="margin-right: 5px">
-            <i class="fa-regular fa-folder" v-if="nodeData.type === 'folder'"></i>
-            <i class="fa-regular fa-file-audio" v-else-if="nodeData.title.endsWith('.mp3')"></i>
-            <i class="fa-regular fa-file-image" v-else-if="nodeData.title.endsWith('.jpg')"></i>
-            <i class="fa-solid fa-file-word" v-else-if="nodeData.title.endsWith('.doc')"></i>
-            <i class="fa-solid fa-file-pdf" v-else-if="nodeData.title.endsWith('.pdf')"></i>
-            <i class="fa-solid fa-file-csv" v-else-if="nodeData.title.endsWith('.csv')"></i>
-            <i class="fa-regular fa-file-lines" v-else-if="nodeData.title.endsWith('.txt')"></i>
-            <i class="fa-regular fa-file" v-else></i>
+            <i v-if="nodeData.type === 'folder'" class="fa-regular fa-folder"></i>
+            <i v-else-if="nodeData.title.endsWith('.mp3')" class="fa-regular fa-file-audio"></i>
+            <i v-else-if="nodeData.title.endsWith('.jpg')" class="fa-regular fa-file-image"></i>
+            <i v-else-if="nodeData.title.endsWith('.doc')" class="fa-solid fa-file-word"></i>
+            <i v-else-if="nodeData.title.endsWith('.pdf')" class="fa-solid fa-file-pdf"></i>
+            <i v-else-if="nodeData.title.endsWith('.csv')" class="fa-solid fa-file-csv"></i>
+            <i v-else-if="nodeData.title.endsWith('.txt')" class="fa-regular fa-file-lines"></i>
+            <i v-else class="fa-regular fa-file"></i>
           </span>
         </template>
       </file-tree>
 
-      <ContextMenu @menuitemClick="onMenuItemClick" ref="contextMenuRef">
+      <ContextMenu ref="contextMenuRef" @menuitemClick="onMenuItemClick" >
         <ContextMenuItem menu-id="editing">editing</ContextMenuItem>
         <ContextMenuItem menu-id="addingFile">addingFile</ContextMenuItem>
         <ContextMenuItem menu-id="addingFolder">addingFolder</ContextMenuItem>
@@ -66,14 +62,14 @@
     <div class="child child1">
       <div class="title">Logs</div>
       <ol reversed>
-        <li class="log" v-for="item in logs" :key="item">{{ item }}</li>
+        <li  v-for="item in logs" :key="item" class="log" >{{ item }}</li>
       </ol>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue';
+import { reactive, ref } from 'vue';
 import ContextMenuItem from '../packages/contextmenu/ContextMenuItem.vue';
 import ContextMenu from '../packages/contextmenu/ContextMenu.vue';
 import type { TreeNode } from '../packages/filetree/types';
@@ -231,16 +227,8 @@ const data = [
   },
 ];
 
-const showList2 = ref(false);
-
-const treeData1 = computed(() => data);
-
-setTimeout(() => {
-  showList2.value = true;
-  console.log('treeData replaced');
-}, 3000);
-
-const treeData2 = reactive(JSON.parse(JSON.stringify(data)));
+const treeData1 = ref(JSON.parse(JSON.stringify(data)));
+const treeData2 = ref(JSON.parse(JSON.stringify(data)));
 </script>
 <style>
 .container {

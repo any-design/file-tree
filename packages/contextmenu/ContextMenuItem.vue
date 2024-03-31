@@ -7,8 +7,7 @@
 <script lang="ts" setup>
 import { inject } from 'vue';
 
-const { menuId } = defineProps({
-  // 数据源列表
+const props = defineProps({
   menuId: {
     type: String,
     required: true,
@@ -16,8 +15,9 @@ const { menuId } = defineProps({
 });
 
 const onMenuItemClicked = inject('onMenuItemClicked') as Function;
+
 const handleClick = () => {
-  onMenuItemClicked(menuId);
+  onMenuItemClicked(props.menuId);
 };
 </script>
 

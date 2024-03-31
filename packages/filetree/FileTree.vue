@@ -1,11 +1,11 @@
 <template>
-  <div class="file-tree-view" @focusin="onFocusIn" @focusout="onFocusOut" tabindex="0">
+  <div class="file-tree-view" tabindex="0" @focusin="onFocusIn" @focusout="onFocusOut">
     <ul>
       <FileTreeNode
-        :node-data="treeData"
-        :level="1"
         :draggable="draggable"
+        :level="1"
         :level-margin="28"
+        :node-data="treeData"
         @nodeDrop="onNodeDrop"
         @nodeSelect="onNodeSelect"
         @fileCreate="onFileCreate"
@@ -14,6 +14,7 @@
         @nodeContextmenu="onNodeContextmenu"
         @nodeExpand="onNodeExpand"
         @nodeCollapse="onNodeCollapse"
+        @nodeUpdate="onNodeUpdate"
       >
         <template v-slot:title="{ nodeData }">
           <slot name="title" :nodeData="nodeData"></slot>
@@ -31,34 +32,13 @@
 
 <script lang="ts" setup>
 import FileTreeNode from './FileTreeNode.vue';
-import { provide, reactive, watch, unref, type PropType } from 'vue';
+import { provide, watch, type PropType, ref } from 'vue';
 import type { DragDropObject, TreeNode } from './types';
 import { Position } from './types';
 import { dirname, findIndexByPath, findNodeByPath, findParentNodeByPath, flattenVisibleTree, join } from './utils';
 
-const ddo: DragDropObject = {
-  drag: null,
-  drop: null,
-  position: Position.IN,
-};
-
-provide('ddo', ddo);
-
-const emits = defineEmits([
-  'nodeSelect',
-  'fileCreate',
-  'folderCreate',
-  'nodeRename',
-  'nodeContextmenu',
-  'nodeExpand',
-  'nodeCollapse',
-  'nodeDrop',
-  'nodeMove',
-]);
-
 const props = defineProps({
-  // 数据源列表
-  data: {
+  modelValue: {
     type: Array as PropType<TreeNode[]>,
     required: true,
   },
@@ -72,20 +52,53 @@ const props = defineProps({
   },
 });
 
-const treeData: TreeNode = reactive({
+const emits = defineEmits([
+  'nodeSelect',
+  'fileCreate',
+  'folderCreate',
+  'nodeRename',
+  'nodeContextmenu',
+  'nodeExpand',
+  'nodeCollapse',
+  'nodeDrop',
+  'nodeMove',
+  'update:modelValue',
+]);
+
+const ddo: DragDropObject = {
+  drag: ref<TreeNode | null>(null),
+  drop: ref<TreeNode | null>(null),
+  position: Position.IN,
+};
+
+provide('ddo', ddo);
+
+// eslint-disable-next-line vue/no-setup-props-destructure
+const treeData = ref<TreeNode>({
   title: '/',
   path: '/',
   type: 'folder',
   expanded: true,
-  children: props.data,
+  children: props.modelValue,
 });
 
 watch(
-  () => props.data,
-  () => {
-    treeData.children = reactive(unref(props.data));
+  () => props.modelValue,
+  (newVal, oldVal) => {
+    console.debug('tree updated', JSON.stringify(newVal), JSON.stringify(oldVal), JSON.stringify(newVal) === JSON.stringify(oldVal) );
+    treeData.value = {
+      title: '/',
+      path: '/',
+      type: 'folder',
+      expanded: true,
+      children: props.modelValue,
+    };
   },
 );
+
+watch(treeData, (newVal) => {
+  emits('update:modelValue', newVal.children || []);
+}, { deep: true });
 
 let selectedItems = [] as TreeNode[];
 let focusedNode: TreeNode | null = null;
@@ -120,8 +133,8 @@ function onSelectionMoved(direction: number) {
   }
 
   const currentSelectedItem = selectedItems[0];
-  treeData.expanded = true;
-  const visibleItems = flattenVisibleTree(treeData);
+  treeData.value.expanded = true;
+  const visibleItems = flattenVisibleTree(treeData.value);
   const index = findIndexByPath(visibleItems, currentSelectedItem.path);
 
   const newIndex = index + direction;
@@ -130,7 +143,7 @@ function onSelectionMoved(direction: number) {
     return;
   }
 
-  // eslint-disable-next-line no-param-reassign
+  // eslint-disable-next-line no-return-assign
   selectedItems.forEach((n) => (n.selected = false));
 
   const newSelectedItem = visibleItems[newIndex];
@@ -220,7 +233,7 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
       item.selected = true;
     }
   } else if (isShiftSelect && props.draggable) {
-    const visibleItems = flattenVisibleTree(treeData);
+    const visibleItems = flattenVisibleTree(treeData.value);
     let lastIndex;
     const lastSelectedItem = selectedItems.pop();
     if (lastSelectedItem) {
@@ -237,7 +250,7 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
     const newSelected = visibleItems.slice(minIndex, maxIndex + 1);
     selectedItems.push(...newSelected);
 
-    // eslint-disable-next-line no-param-reassign
+    // eslint-disable-next-line no-return-assign
     newSelected.forEach((s) => (s.selected = true));
   } else {
     for (const node of selectedItems) {
@@ -253,12 +266,12 @@ function onNodeSelect(event: MouseEvent, item: TreeNode) {
 }
 
 function onNodeDrop() {
-  if (ddo.drop.path === ddo.drag.path) {
+  if (ddo.drop.value.path === ddo.drag.value.path) {
     return;
   }
 
-  const dragItem = findNodeByPath(treeData, ddo.drag.path);
-  const dropItem = findNodeByPath(treeData, ddo.drop.path);
+  const dragItem = findNodeByPath(treeData.value, ddo.drag.value.path);
+  const dropItem = findNodeByPath(treeData.value, ddo.drop.value.path);
   if (!dragItem || !dropItem) {
     return;
   }
@@ -274,18 +287,20 @@ function onNodeDrop() {
   }
 
   // remove from source
-  const dragParent = findParentNodeByPath(treeData, dragItem.path);
+  const dragParent = findParentNodeByPath(treeData.value, dragItem.path);
   if (!dragParent?.children) {
     return;
   }
+
   for (let i = 0; i < dragParent.children.length; i++) {
-    if (dragParent.children[i].title === ddo.drag.title) {
+    if (dragParent.children[i].title === ddo.drag.value.title) {
       dragParent.children.splice(i, 1);
     }
   }
 
   const oldPath = dragItem?.path;
   const title = dragItem?.title;
+
   let newPath;
 
   if (ddo.position === Position.IN) {
@@ -297,7 +312,7 @@ function onNodeDrop() {
 
     newPath = join(dropItem.path, title);
   } else {
-    const dropItemParent = findParentNodeByPath(treeData, dropItem.path);
+    const dropItemParent = findParentNodeByPath(treeData.value, dropItem.path);
     if (!dropItemParent) {
       return;
     }
@@ -319,6 +334,13 @@ function onNodeDrop() {
 
   if (newPath !== oldPath) {
     emits('nodeMove', newPath, oldPath);
+  }
+}
+
+function onNodeUpdate(nodeData: TreeNode) {
+  const index = treeData.value.children?.findIndex((item) => item.path === nodeData.path) ?? -1;
+  if (index >= 0) {
+    treeData.value.children?.splice(index, 1, nodeData);
   }
 }
 </script>

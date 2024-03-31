@@ -1,10 +1,9 @@
 module.exports = {
   root: true,
   extends: [
-    'plugin:vue/vue3-essential',
-    '@tencent/eslint-config-tencent',
-    '@tencent/eslint-config-tencent/ts',
-    '@tencent/eslint-config-tencent/prettier',
+    'alloy',
+    'alloy/vue',
+    'alloy/typescript',
   ],
   plugins: ['vue'],
   parser: 'vue-eslint-parser',
@@ -13,6 +12,9 @@ module.exports = {
     sourceType: 'module',
     project: './tsconfig.app.json',
     extraFileExtensions: ['.vue'],
+  },
+  rules: {
+    'vue/v-on-event-hyphenation': 0,
   },
   overrides: [
     {

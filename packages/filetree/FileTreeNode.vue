@@ -42,15 +42,15 @@
 
         <template v-if="nodeDataInner.editing">
           <input
-            type="text"
-            @blur="onNodeRename(nodeDataInner, newName)"
-            v-on:keyup.esc="onEditingEsc"
-            v-on:keydown.enter="onNodeRename(nodeDataInner, newName)"
             ref="editingInputRef"
             v-model="newName"
+            type="text"
+            @blur="onNodeRename(nodeDataInner, newName)"
+            @keyup.esc="onEditingEsc"
+            @keydown.enter="onNodeRename(nodeDataInner, newName)"
           />
         </template>
-        <slot name="title" :nodeData="nodeDataInner" v-else>
+        <slot v-else name="title" :nodeData="nodeDataInner">
           <span class="title">{{ nodeDataInner.title }}</span>
         </slot>
       </div>
@@ -67,23 +67,23 @@
         >
           <template v-if="nodeDataInner.addingFolder">
             <input
-              type="text"
               ref="addingFolderInputRef"
-              @blur="onFolderCreate(nodeDataInner, newFolderName)"
-              v-on:keydown.enter="onFolderCreate(nodeDataInner, newFolderName)"
-              v-on:keyup.esc="onFolderEsc"
               v-model="newFolderName"
+              type="text"
+              @blur="onFolderCreate(nodeDataInner, newFolderName)"
+              @keydown.enter="onFolderCreate(nodeDataInner, newFolderName)"
+              @keyup.esc="onFolderEsc"
             />
           </template>
 
           <template v-if="nodeDataInner.addingFile">
             <input
-              type="text"
               ref="addingFileInputRef"
-              @blur="onFileCreate(nodeDataInner, newFileName)"
-              v-on:keydown.enter="onFileCreate(nodeDataInner, newFileName)"
-              v-on:keyup.esc="onFileEsc"
               v-model="newFileName"
+              type="text"
+              @blur="onFileCreate(nodeDataInner, newFileName)"
+              @keydown.enter="onFileCreate(nodeDataInner, newFileName)"
+              @keyup.esc="onFileEsc"
             />
           </template>
         </li>
@@ -103,6 +103,7 @@
           @nodeContextmenu="onNodeContextmenu"
           @nodeExpand="onNodeExpand"
           @nodeCollapse="onNodeCollapse"
+          @nodeUpdate="onNodeUpdate"
         >
           <template v-slot:toggler="{ nodeData }">
             <slot name="toggler" :nodeData="nodeData"></slot>
@@ -122,7 +123,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch, type PropType, watchEffect } from 'vue';
+import { inject, nextTick, ref, watch, type PropType } from 'vue';
 import type { DragDropObject, TreeNode } from './types';
 import { Position } from './types';
 
@@ -145,17 +146,36 @@ const props = defineProps({
   },
 });
 
+const emits = defineEmits([
+  'nodeDrop',
+  'nodeSelect',
+  'fileCreate',
+  'folderCreate',
+  'nodeRename',
+  'nodeContextmenu',
+  'nodeExpand',
+  'nodeCollapse',
+  'nodeUpdate',
+]);
+
 defineSlots<{
   title: (props: { nodeData: TreeNode }) => void;
   toggler: (props: { nodeData: TreeNode }) => void;
   icon: (props: { nodeData: TreeNode }) => void;
 }>();
 
-let nodeDataInner = reactive(props.nodeData);
+// eslint-disable-next-line vue/no-setup-props-destructure
+let nodeDataInner = ref<TreeNode>(props.nodeData);
 
-watchEffect(() => {
-  nodeDataInner = reactive(props.nodeData);
+watch(() => props.nodeData, () => {
+  nodeDataInner.value = props.nodeData;
+  // keep reactivity
+  newName.value = props.nodeData.title;
 });
+
+watch(nodeDataInner, () => {
+  emits('nodeUpdate', nodeDataInner);
+}, { deep: true });
 
 const ddo = inject('ddo') as DragDropObject;
 
@@ -166,13 +186,15 @@ const dragOverClass = ref('');
 
 const newFileName = ref('');
 const newFolderName = ref('');
-const newName = ref(nodeDataInner.title);
+
+// eslint-disable-next-line vue/no-ref-object-destructure
+const newName = ref(nodeDataInner.value.title);
 
 watch(
-  () => nodeDataInner.editing,
+  () => nodeDataInner.value.editing,
   async (newValue) => {
     if (newValue) {
-      newName.value = nodeDataInner?.title;
+      newName.value = nodeDataInner.value?.title;
       await nextTick();
       editingInputRef.value.focus();
     }
@@ -180,7 +202,7 @@ watch(
 );
 
 watch(
-  () => nodeDataInner.addingFolder,
+  () => nodeDataInner.value.addingFolder,
   async (newValue) => {
     if (newValue) {
       newFolderName.value = '';
@@ -191,7 +213,7 @@ watch(
 );
 
 watch(
-  () => nodeDataInner.addingFile,
+  () => nodeDataInner.value.addingFile,
   async (newValue) => {
     if (newValue) {
       newFileName.value = '';
@@ -205,21 +227,10 @@ const onNodeContextmenu = async (e: MouseEvent, nodeData: TreeNode) => {
   emits('nodeContextmenu', e, nodeData);
 };
 
-const emits = defineEmits([
-  'nodeDrop',
-  'nodeSelect',
-  'fileCreate',
-  'folderCreate',
-  'nodeRename',
-  'nodeContextmenu',
-  'nodeExpand',
-  'nodeCollapse',
-]);
-
 function onNodeToggle() {
-  nodeDataInner.expanded = !nodeDataInner.expanded;
+  nodeDataInner.value.expanded = !nodeDataInner.value.expanded;
 
-  if (nodeDataInner.expanded) {
+  if (nodeDataInner.value.expanded) {
     emits('nodeExpand', nodeDataInner);
   } else {
     emits('nodeCollapse', nodeDataInner);
@@ -238,7 +249,7 @@ function onNodeRename(node: TreeNode, name: string) {
 }
 
 function onEditingEsc() {
-  nodeDataInner.editing = false;
+  nodeDataInner.value.editing = false;
 }
 
 function onNodeDrop() {
@@ -270,8 +281,8 @@ function onFileCreate(nodeData: TreeNode, newFileName: string) {
 }
 
 function onFileEsc() {
-  nodeDataInner.expanded = true;
-  nodeDataInner.addingFile = false;
+  nodeDataInner.value.expanded = true;
+  nodeDataInner.value.addingFile = false;
 }
 
 function onFolderCreate(nodeData: TreeNode, newFileName: string) {
@@ -288,8 +299,8 @@ function onFolderCreate(nodeData: TreeNode, newFileName: string) {
 }
 
 function onFolderEsc() {
-  nodeDataInner.expanded = true;
-  nodeDataInner.addingFolder = false;
+  nodeDataInner.value.expanded = true;
+  nodeDataInner.value.addingFolder = false;
 }
 
 function onNodeExpand(nodeData: TreeNode) {
@@ -298,6 +309,13 @@ function onNodeExpand(nodeData: TreeNode) {
 
 function onNodeCollapse(nodeData: TreeNode) {
   emits('nodeCollapse', nodeData);
+}
+
+function onNodeUpdate(nodeData: TreeNode) {
+  const index = nodeDataInner.value.children?.findIndex((item) => item.path === nodeData.path) ?? -1;
+  if (index >= 0) {
+    nodeDataInner.value.children?.splice(index, 1, nodeData);
+  }
 }
 
 function onDragStart() {
@@ -309,17 +327,17 @@ function onDragOver(e: DragEvent) {
     e.dataTransfer.dropEffect = 'move';
   }
 
-  if (nodeDataInner?.path === ddo.drag.path) {
+  if (nodeDataInner.value?.path === ddo.drag.path) {
     return;
   }
 
-  const position = calculateDropPosition(e, nodeDataInner?.type);
+  const position = calculateDropPosition(e, nodeDataInner.value?.type);
   ddo.position = position;
   if (position === Position.ABOVE) {
     dragOverClass.value = 'tree-drag-over-top';
   } else if (position === Position.BELOW) {
     // when a folder is expanded, there is no below position
-    if (nodeDataInner.type === 'file' || !nodeDataInner.expanded) {
+    if (nodeDataInner.value.type === 'file' || !nodeDataInner.value.expanded) {
       dragOverClass.value = 'tree-drag-over-bottom';
     }
   } else {

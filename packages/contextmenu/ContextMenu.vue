@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div class="contextMenu-wrapper">
       <transition name="fade">
-        <div class="contextMenu" ref="contextmenuRef" :style="style" v-if="visible">
+        <div v-if="visible" ref="contextmenuRef" class="contextMenu" :style="style">
           <slot />
         </div>
       </transition>
@@ -13,15 +13,14 @@
 import { ref, computed, nextTick, provide } from 'vue';
 import useClickOutside from './UseClickOutside';
 
+const emits = defineEmits(['menuitemClick']);
 const contextmenuRef = ref<HTMLDivElement | null>(null);
 const visible = ref(false);
 
 let contextData: any = null;
 
-const emits = defineEmits(['menuitem-click']);
-
 function onMenuItemClicked(menuId: string) {
-  emits('menuitem-click', contextData, menuId);
+  emits('menuitemClick', contextData, menuId);
   visible.value = false;
 }
 
