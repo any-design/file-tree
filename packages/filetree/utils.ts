@@ -20,16 +20,19 @@ export function flattenVisibleTree(tree: TreeNode): TreeNode[] {
   return result;
 }
 
-export function findNodeByPath(node: TreeNode, targetPath: string): TreeNode | null {
+export function findNodeByPath(node: TreeNode, targetPath: string, level = 1): TreeNode | null {
   if (node.path === targetPath) {
     return node;
   }
 
   if (node.children && node.children.length > 0) {
     for (const n of node.children) {
-      const foundNode = findNodeByPath(n, targetPath);
+      const foundNode = findNodeByPath(n, targetPath, level + 1);
       if (foundNode) {
-        return foundNode;
+        return {
+          ...foundNode,
+          level,
+        };
       }
     }
   }

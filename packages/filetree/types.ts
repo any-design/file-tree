@@ -15,6 +15,7 @@ export interface TreeNode {
   addingFile?: boolean;
   addingFolder?: boolean;
   editing?: boolean;
+  level?: number;
 }
 
 export enum Position {

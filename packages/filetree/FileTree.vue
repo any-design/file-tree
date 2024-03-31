@@ -286,6 +286,11 @@ function onNodeDrop() {
     return;
   }
 
+  // cannot drop parent into children
+  if (dragItem.path.startsWith(dropItem.path)) {
+    return;
+  }
+
   // remove from source
   const dragParent = findParentNodeByPath(treeData.value, dragItem.path);
   if (!dragParent?.children) {
