@@ -73,6 +73,9 @@ const ddo: DragDropObject = {
 
 provide('ddo', ddo);
 
+let selectedItems = [] as TreeNode[];
+let focusedNode: TreeNode | null = null;
+
 // eslint-disable-next-line vue/no-setup-props-destructure
 const treeData = ref<TreeNode>({
   title: '/',
@@ -81,6 +84,20 @@ const treeData = ref<TreeNode>({
   expanded: true,
   children: props.modelValue,
 });
+
+
+const getSelectedItems = (nodes: TreeNode[]) => {
+  const result: TreeNode[] = [];
+  nodes.forEach((node) => {
+    if (node.selected) {
+      result.push(node);
+    }
+    if (node.children) {
+      result.push(...getSelectedItems(node.children));
+    }
+  });
+  return result;
+};
 
 watch(
   () => props.modelValue,
@@ -93,15 +110,13 @@ watch(
       expanded: true,
       children: props.modelValue,
     };
+    selectedItems = getSelectedItems(props.modelValue);
   },
 );
 
 watch(treeData, (newVal) => {
   emits('update:modelValue', newVal.children || []);
 }, { deep: true });
-
-let selectedItems = [] as TreeNode[];
-let focusedNode: TreeNode | null = null;
 
 function onFocusIn() {
   window.addEventListener('keydown', onKeyDown);
