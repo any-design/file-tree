@@ -1,21 +1,10 @@
 <template>
   <div class="file-tree-view" tabindex="0" @focusin="onFocusIn" @focusout="onFocusOut">
     <ul>
-      <FileTreeNode
-        :draggable="draggable"
-        :level="1"
-        :level-margin="28"
-        :node-data="treeData"
-        @nodeDrop="onNodeDrop"
-        @nodeSelect="onNodeSelect"
-        @fileCreate="onFileCreate"
-        @folderCreate="onFolderCreate"
-        @nodeRename="onNodeRename"
-        @nodeContextmenu="onNodeContextmenu"
-        @nodeExpand="onNodeExpand"
-        @nodeCollapse="onNodeCollapse"
-        @nodeUpdate="onNodeUpdate"
-      >
+      <FileTreeNode :draggable="draggable" :level="1" :level-margin="28" :node-data="treeData" @nodeDrop="onNodeDrop"
+        @nodeSelect="onNodeSelect" @fileCreate="onFileCreate" @folderCreate="onFolderCreate" @nodeRename="onNodeRename"
+        @nodeContextmenu="onNodeContextmenu" @nodeExpand="onNodeExpand" @nodeCollapse="onNodeCollapse"
+        @nodeUpdate="onNodeUpdate">
         <template v-slot:title="{ nodeData }">
           <slot name="title" :nodeData="nodeData"></slot>
         </template>
@@ -85,7 +74,6 @@ const treeData = ref<TreeNode>({
   children: props.modelValue,
 });
 
-
 const getSelectedItems = (nodes: TreeNode[]) => {
   const result: TreeNode[] = [];
   nodes.forEach((node) => {
@@ -101,8 +89,7 @@ const getSelectedItems = (nodes: TreeNode[]) => {
 
 watch(
   () => props.modelValue,
-  (newVal, oldVal) => {
-    console.debug('tree updated', JSON.stringify(newVal), JSON.stringify(oldVal), JSON.stringify(newVal) === JSON.stringify(oldVal) );
+  () => {
     treeData.value = {
       title: '/',
       path: '/',
@@ -114,9 +101,13 @@ watch(
   },
 );
 
-watch(treeData, (newVal) => {
-  emits('update:modelValue', newVal.children || []);
-}, { deep: true });
+watch(
+  treeData,
+  (newVal) => {
+    emits('update:modelValue', newVal.children || []);
+  },
+  { deep: true },
+);
 
 function onFocusIn() {
   window.addEventListener('keydown', onKeyDown);
